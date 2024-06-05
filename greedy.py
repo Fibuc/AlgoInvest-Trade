@@ -79,11 +79,6 @@ def filter_negative_numbers(filtering_list):
 
 
 def show_best_combination(combination_actions: list[dict]):
-    """Affiche la meilleure combination d'actions entrée en paramètre.
-
-    Args:
-        combination_actions (list[dict]): Liste de la meilleure combinaison d'actions.
-    """
     total_price = 0
     total_profit = 0
     border = 65 * "-"
@@ -95,63 +90,32 @@ def show_best_combination(combination_actions: list[dict]):
     
     message += f"\n{border}\n| TOTAL \t|\t{total_price:.2f}\t|\t\t|\t{total_profit:.2f}\t|\n{border}"
     print(message)
+    
 
+def sort_by_profit_percent(all_actions):
+    return sorted(all_actions, key=lambda x: x["profit"], reverse=True)
 
-def scale_to_integers(number_to_factor: int | float, scale_factor=100) -> int:
-    """Met à l'échelle le nombre en le multipliant par la valeur du facteur et
-    retourne un nombre entier.
+def greedy_algorithm(all_actions: list): # Naif
+    combination = []
+    current_amount = 0
+    sorted_actions = sort_by_profit_percent(all_actions)
+    for action in sorted_actions:
+        if (action["price"] + current_amount) < CLIENT_MAX_AMOUNT and action["price"] > 0:
+            current_amount += action["price"]
+            combination.append(action)
 
-    Args:
-        number_to_factor (int | float): Nombre à mettre à l'échelle.
-
-    Returns:
-        int: Nombre entier mit à l'échelle.
-    """
-    return int(number_to_factor * scale_factor)
-
-
-def dynamic_algorithm(all_actions: list[dict]) -> list[dict]:
-    """Récupère et retourne la meilleure combinaison possibles d'actions afin
-    d'obtenir le meilleur profit dans la limite du prix indiqué dans la
-    variable CLIENT_MAX_AMOUNT. (Knapsack Problem)
-
-    Args:
-        items (list[dict]): Liste de toutes les actions.
-
-    Returns:
-        list[dict]: Liste comprenant la meilleure combinaison d'actions.
-    """
-    actions_number = len(all_actions)
-    # Création de la matrice.
-    dp = [[0] * (CLIENT_MAX_AMOUNT + 1) for _ in range(actions_number + 1)]
-    for i in range(1, actions_number + 1):
-        price, profit = all_actions[i - 1][PRICE_KEY], all_actions[i - 1][PROFIT_AMOUNT_KEY]
-        for j in range(CLIENT_MAX_AMOUNT + 1):
-            if price <= j:
-                # Changement dans la matrice
-                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-math.ceil(price)] + profit)
-            else:
-                dp[i][j] = dp[i - 1][j]
-
-    max_amount = CLIENT_MAX_AMOUNT
-    choosed_elements = []
-    # Récupération des éléments en parcourant la matrice.
-    for i in range(actions_number, 0, -1):
-        if dp[i][max_amount] != dp[i - 1][max_amount]:
-            choosed_elements.append(all_actions[i - 1])
-            price = all_actions[i - 1][PRICE_KEY]
-            max_amount -= math.ceil(price)
-
-    return choosed_elements
+    return combination
 
 
 def run():
-    datas = get_csv_datas(DATASET_1_PATH)
+    datas = get_csv_datas(DATASET_2_PATH)
     convert_datas_to_integer(datas)
     calculate_amount_profit(datas)
     datas = filter_negative_numbers(datas)
-    best_combination = dynamic_algorithm(datas)
+    best_combination = greedy_algorithm(datas)
     show_best_combination(best_combination)
+    # [print(combi[PROFIT_AMOUNT_KEY]) for combi in best_combination]
+    # [print(combi[PRICE_KEY]) for combi in best_combination]
 
 
 run()

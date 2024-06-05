@@ -121,25 +121,25 @@ def dynamic_algorithm(all_actions: list[dict]) -> list[dict]:
     Returns:
         list[dict]: Liste comprenant la meilleure combinaison d'actions.
     """
+    max_amount = scale_to_integers(CLIENT_MAX_AMOUNT)
     actions_number = len(all_actions)
     # Création de la matrice.
-    dp = [[0] * (CLIENT_MAX_AMOUNT + 1) for _ in range(actions_number + 1)]
+    dp = [[0] * (max_amount + 1) for _ in range(actions_number + 1)]
     for i in range(1, actions_number + 1):
-        price, profit = all_actions[i - 1][PRICE_KEY], all_actions[i - 1][PROFIT_AMOUNT_KEY]
-        for j in range(CLIENT_MAX_AMOUNT + 1):
+        price, profit = scale_to_integers(all_actions[i - 1][PRICE_KEY]), scale_to_integers(all_actions[i - 1][PROFIT_AMOUNT_KEY])
+        for j in range(max_amount + 1):
             if price <= j:
                 # Changement dans la matrice
-                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-math.ceil(price)] + profit)
+                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-int(price)] + profit)
             else:
                 dp[i][j] = dp[i - 1][j]
 
-    max_amount = CLIENT_MAX_AMOUNT
     choosed_elements = []
     # Récupération des éléments en parcourant la matrice.
     for i in range(actions_number, 0, -1):
         if dp[i][max_amount] != dp[i - 1][max_amount]:
             choosed_elements.append(all_actions[i - 1])
-            price = all_actions[i - 1][PRICE_KEY]
+            price = scale_to_integers(all_actions[i - 1][PRICE_KEY])
             max_amount -= math.ceil(price)
 
     return choosed_elements
