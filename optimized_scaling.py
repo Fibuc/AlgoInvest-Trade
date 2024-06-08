@@ -146,7 +146,7 @@ def dynamic_algorithm(all_actions: list[dict]) -> list[dict]:
 
 
 def run():
-    datas = get_csv_datas(DATASET_1_PATH)
+    datas = get_csv_datas(WORKING_DATAS_PATH)
     convert_datas_to_integer(datas)
     calculate_amount_profit(datas)
     datas = filter_negative_numbers(datas)
