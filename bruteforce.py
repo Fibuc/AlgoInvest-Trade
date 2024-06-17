@@ -2,9 +2,11 @@ import csv
 from itertools import combinations
 from pathlib import Path
 
-WORKING_DATAS_PATH = Path(__file__).parent / "data" / "working_datas.csv"
-DATASET_1_PATH = Path(__file__).parent / "data" / "dataset1_Python+P7.csv"
-DATASET_2_PATH = Path(__file__).parent / "data" / "dataset2_Python+P7.csv"
+# Constantes du répertoire.
+FILE_NAME = "working_datas.csv"
+DATA_DIR_PATH = Path(__file__).parent / "data"
+FILE_PATH = DATA_DIR_PATH / FILE_NAME
+# Constantes de configuration de l'algorithme.
 CLIENT_MAX_AMOUNT = 500
 NAME_KEY = "name"
 PRICE_KEY = "price"
@@ -30,7 +32,7 @@ def get_csv_datas(file_path: Path | str) -> list[dict]:
     return all_actions
 
 
-def convert_datas_to_integer(all_actions: list[dict]):
+def convert_datas_to_float(all_actions: list[dict]):
     """Convertie les données des prix et profits des actions en nombre décimaux.
 
     Args:
@@ -123,12 +125,12 @@ def bruteforce_algorithm(all_actions: list[dict]) -> tuple[dict]:
 
 
 def run():
-    datas = get_csv_datas(WORKING_DATAS_PATH)
-    convert_datas_to_integer(datas)
+    datas = get_csv_datas(FILE_PATH)
+    convert_datas_to_float(datas)
     calculate_amount_profit(datas)
     datas = filter_negative_numbers(datas)
     best_combination = bruteforce_algorithm(datas)
     show_best_combination(best_combination)
 
-
-run()
+if __name__ == '__main__':
+    run()

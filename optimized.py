@@ -2,9 +2,11 @@ import math
 import csv
 from pathlib import Path
 
-WORKING_DATAS_PATH = Path(__file__).parent / "data" / "working_datas.csv"
-DATASET_1_PATH = Path(__file__).parent / "data" / "dataset1_Python+P7.csv"
-DATASET_2_PATH = Path(__file__).parent / "data" / "dataset2_Python+P7.csv"
+# Constantes du répertoire.
+FILE_NAME = "working_datas.csv"
+DATA_DIR_PATH = Path(__file__).parent / "data"
+FILE_PATH = DATA_DIR_PATH / FILE_NAME
+# Constantes de configuration de l'algorithme.
 CLIENT_MAX_AMOUNT = 500
 NAME_KEY = "name"
 PRICE_KEY = "price"
@@ -30,7 +32,7 @@ def get_csv_datas(file_path: Path | str) -> list[dict]:
     return all_actions
 
 
-def convert_datas_to_integer(all_actions: list[dict]):
+def convert_datas_to_float(all_actions: list[dict]):
     """Convertie les données des prix et profits des actions en nombre décimaux.
 
     Args:
@@ -121,37 +123,37 @@ def dynamic_algorithm(all_actions: list[dict]) -> list[dict]:
     Returns:
         list[dict]: Liste comprenant la meilleure combinaison d'actions.
     """
+    max_amount = scale_to_integers(CLIENT_MAX_AMOUNT)
     actions_number = len(all_actions)
     # Création de la matrice.
-    dp = [[0] * (CLIENT_MAX_AMOUNT + 1) for _ in range(actions_number + 1)]
+    dp = [[0] * (max_amount + 1) for _ in range(actions_number + 1)]
     for i in range(1, actions_number + 1):
-        price, profit = all_actions[i - 1][PRICE_KEY], all_actions[i - 1][PROFIT_AMOUNT_KEY]
-        for j in range(CLIENT_MAX_AMOUNT + 1):
+        price, profit = scale_to_integers(all_actions[i - 1][PRICE_KEY]), scale_to_integers(all_actions[i - 1][PROFIT_AMOUNT_KEY])
+        for j in range(max_amount + 1):
             if price <= j:
                 # Changement dans la matrice
-                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-math.ceil(price)] + profit)
+                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j-int(price)] + profit)
             else:
                 dp[i][j] = dp[i - 1][j]
 
-    max_amount = CLIENT_MAX_AMOUNT
     choosed_elements = []
     # Récupération des éléments en parcourant la matrice.
     for i in range(actions_number, 0, -1):
         if dp[i][max_amount] != dp[i - 1][max_amount]:
             choosed_elements.append(all_actions[i - 1])
-            price = all_actions[i - 1][PRICE_KEY]
+            price = scale_to_integers(all_actions[i - 1][PRICE_KEY])
             max_amount -= math.ceil(price)
 
     return choosed_elements
 
 
 def run():
-    datas = get_csv_datas(DATASET_1_PATH)
-    convert_datas_to_integer(datas)
+    datas = get_csv_datas(FILE_PATH)
+    convert_datas_to_float(datas)
     calculate_amount_profit(datas)
     datas = filter_negative_numbers(datas)
     best_combination = dynamic_algorithm(datas)
     show_best_combination(best_combination)
 
-
-run()
+if __name__ == '__main__':
+    run()
